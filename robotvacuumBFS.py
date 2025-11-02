@@ -105,6 +105,7 @@ def make_front(state):
 """
 
 def expand_front(front, method):  
+    #TODO: ADD EURISTIKI 
     if method=='DFS':        
         if front:
             print("Front:")
@@ -182,7 +183,14 @@ def main():
           σκουπίδια 5ου, σκουπίδια 6ου, σκουπίδια 7ου, σκουπίδια 8ου, θέση βάσης, σκουπίδια σκούπας]
     """
     goal = [3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0]
-    method='BFS'
+    method="" 
+    #TODO: ADD EURISTIKI CHOICE 
+    print("Choose method BFS or DFS") #User chooses BFS or DFS
+    method=input()
+    print(method)
+    while (method != 'BFS' and method != 'DFS'):
+        print("Choose method BFS or DFS")
+        input(method)
    
     """ ----------------------------------------------------------------------------
     **** starting search
