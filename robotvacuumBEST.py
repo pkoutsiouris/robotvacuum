@@ -1,17 +1,15 @@
 """
 ----------------------------------------------------------------------------
-******** Search Code for DFS  and other search methods
+******** Search Code for DFS, BFS, and Best First Search
 ******** (expanding front only)
 ******** author:  AI lab
 ********
-******** Κώδικας για DFS και άλλες μεθόδους αναζήτησης
+******** Κώδικας για DFS, BFS και Best First Search
 ******** (επέκταση μετώπου μόνο)
 ******** Συγγραφέας: Κωνσταντίνος Μπίρμπας,Ευάγγελος Σκεύης, Παναγιώτης Κουτσιούρης
 """
 
 import copy
-
- 
 
 # ******** Operators
 # ******** Τελεστές
@@ -29,14 +27,14 @@ def move_right(state):
     return state
     
 def move_left(state):
-    if state[-1]<3 and state[0]>1:
-        state[0]=state[0]-1
-        if state[state[0]]>3-state[-1]:
-            state[state[0]]=state[state[0]] - (3-state[-1])
-            state[-1]=3
+    if state[-1] < 3 and state[0] > 1:
+        state[0] = state[0] - 1
+        if state[state[0]] > 3 - state[-1]:
+            state[state[0]] = state[state[0]] - (3 - state[-1])
+            state[-1] = 3
         else:
-            state[-1]= state[-1] + state[state[0]]
-            state[state[0]]=0
+            state[-1] = state[-1] + state[state[0]]
+            state[state[0]] = 0
             
         return state
  
@@ -56,6 +54,7 @@ def move_to_base(state):
             state[0] = robot_pos - 1
     
     return state
+
 '''
 Συνάρτηση εύρεσης απογόνων της τρέχουσας κατάστασης
 '''
@@ -87,6 +86,47 @@ def find_children(state):
     return children
 
 """ ----------------------------------------------------------------------------
+**** HEURISTIC FUNCTION
+**** Ευρετική Συνάρτηση
+"""
+
+def heuristic(state):
+    """
+    Ευρετική συνάρτηση που υπολογίζει το εκτιμώμενο κόστος για να φτάσουμε στον στόχο.
+    Βασίζεται σε:
+    1. Συνολικά σκουπίδια που απομένουν στο περιβάλλον
+    2. Απόσταση από τη σκούπα στο πλησιέστερο σκουπίδι ή στη βάση αν είναι γεμάτη
+    3. Σκουπίδια στη σκούπα (πρέπει να αδειάσει)
+    """
+    robot_pos = state[0]
+    base_pos = state[-2]
+    vacuum_dirt = state[-1]
+    
+    # Συνολικά σκουπίδια στο περιβάλλον (θέσεις 1-8)
+    total_dirt = sum(state[1:9])
+    
+    # Βρες την απόσταση στο πλησιέστερο σκουπίδι
+    min_distance_to_dirt = float('inf')
+    for i in range(1, 9):
+        if state[i] > 0:
+            distance = abs(robot_pos - i)
+            min_distance_to_dirt = min(min_distance_to_dirt, distance)
+    
+    # Αν δεν υπάρχουν σκουπίδια στο περιβάλλον
+    if min_distance_to_dirt == float('inf'):
+        min_distance_to_dirt = 0
+    
+    # Απόσταση από τη βάση
+    distance_to_base = abs(robot_pos - base_pos)
+    
+    # Αν η σκούπα είναι γεμάτη, προτεραιότητα στην απόσταση από τη βάση
+    if vacuum_dirt >= 3:
+        return total_dirt + distance_to_base * 2 + vacuum_dirt
+    else:
+        # Αλλιώς, προτεραιότητα στο πλησιέστερο σκουπίδι
+        return total_dirt + min_distance_to_dirt + vacuum_dirt * 0.5
+
+""" ----------------------------------------------------------------------------
 **** FRONT
 **** Διαχείριση Μετώπου
 """
@@ -105,64 +145,77 @@ def make_front(state):
 """
 
 def expand_front(front, method):  
-    if method=='DFS':        
+    if method == 'DFS':        
         if front:
             print("Front:")
             print(front)
-            node=front.pop(0)
+            node = front.pop(0)
             for child in find_children(node):     
-                front.insert(0,child)
+                front.insert(0, child)
     
-    #elif method=='BFS':
-    #elif method=='BestFS':
-    #else: "other methods to be added"        
+    elif method == 'BFS':
+        if front:
+            print("Front:")
+            print(front)
+            node = front.pop(0)
+            for child in find_children(node):     
+                front.append(child)
+    
+    elif method == 'BestFS':
+        if front:
+            print("Front:")
+            print(front)
+            node = front.pop(0)
+            children = find_children(node)
+            
+            # Προσθήκη των παιδιών στο μέτωπο
+            front.extend(children)
+            
+            # Ταξινόμηση του μετώπου με βάση την ευρετική συνάρτηση
+            # (Μικρότερη τιμή = καλύτερη κατάσταση)
+            front.sort(key=lambda state: heuristic(state))
+            
+            print(f"Heuristic values: {[heuristic(s) for s in front[:5]]}")  # Εμφάνιση των 5 πρώτων
     
     return front
 
 """ ----------------------------------------------------------------------------
 **** Problem depending functions
 **** ο κόσμος του προβλήματος (αν απαιτείται) και υπόλοιπες συναρτήσεις σχετικές με το πρόβλημα
-
-  #### to be  added ####
 """
 
 """ Function that checks if current state is a goal state """
 
-#def is_goal_state(state):
+# def is_goal_state(state):
 
 """ ----------------------------------------------------------------------------
 **** Basic recursive function to create search tree (recursive tree expansion)
 **** Βασική αναδρομική συνάρτηση για δημιουργία δέντρου αναζήτησης (αναδρομική επέκταση δέντρου)
 """
 
-def find_solution(state,front, closed, goal, method):
-#def find_solution(front, closed, method):
-    if state[-1]>= 3:
+def find_solution(state, front, closed, goal, method):
+    if state[-1] >= 3:
         move_to_base(state)   
+    
     if not front:
         print('_NO_SOLUTION_FOUND_')
     
     elif front[0] in closed:
-        new_front=copy.deepcopy(front)
+        new_front = copy.deepcopy(front)
         new_front.pop(0)
-        find_solution(state,new_front, closed, goal, method)
-        #find_solution(new_front, closed, method)
+        find_solution(state, new_front, closed, goal, method)
     
-   # elif is_goal_state(front[0]):
-    elif front[0]==goal:
+    elif front[0] == goal:
         print('_GOAL_FOUND_')
         print(front[0])
     
     else:
         closed.append(front[0])
-        front_copy=copy.deepcopy(front)
-        front_children=expand_front(front_copy, method)
-        closed_copy=copy.deepcopy(closed)
-        find_solution(state,front_children, closed_copy, goal, method)
-        #find_solution(front_children, closed_copy, goal, method)
-        
+        front_copy = copy.deepcopy(front)
+        front_children = expand_front(front_copy, method)
+        closed_copy = copy.deepcopy(closed)
+        find_solution(state, front_children, closed_copy, goal, method)
 
-        
 """" ----------------------------------------------------------------------------
 ** Executing the code
 ** κλήση εκτέλεσης κώδικα
@@ -176,7 +229,15 @@ def main():
           σκουπίδια 5ου, σκουπίδια 6ου, σκουπίδια 7ου, σκουπίδια 8ου, θέση βάσης, σκουπίδια σκούπας]
     """
     goal = [3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0]
-    method='DFS'
+    method = "" 
+    
+    print("Choose method: BFS, DFS, or BestFS")
+    method = input().strip()
+    print(method)
+    
+    while method not in ['BFS', 'DFS', 'BestFS']:
+        print("Invalid choice. Choose method: BFS, DFS, or BestFS")
+        method = input().strip()
    
     """ ----------------------------------------------------------------------------
     **** starting search
@@ -184,8 +245,7 @@ def main():
     """
     
     print('____BEGIN__SEARCHING____')
-    find_solution(initial_state,make_front(initial_state), [], goal, method)
-    #find_solution(make_front(initial_state), [], method)
+    find_solution(initial_state, make_front(initial_state), [], goal, method)
 
 if __name__ == "__main__":
     main()
