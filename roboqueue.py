@@ -243,6 +243,10 @@ def find_solution(state, front, queue, closed, goal, method):
         # Εκτύπωση της διαδρομής
         print("Final Path:")
         print(queue[0])
+        
+        # ***** ΠΡΟΣΘΗΚΗ ΓΙΑ ΤΗ ΜΕΤΡΗΣΗ *****
+        print(f"Εξερευνημένες Καταστάσεις ({method}): {len(closed)}")
+        # ***********************************
     
     else:
         closed.append(front[0])
