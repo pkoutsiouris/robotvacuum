@@ -86,45 +86,39 @@ def find_children(state):
     return children
 
 """ ----------------------------------------------------------------------------
-**** HEURISTIC FUNCTION
 **** Ευρετική Συνάρτηση
 """
+def heuristic(state):  
 
-def heuristic(state):
-    """
-    Ευρετική συνάρτηση που υπολογίζει το εκτιμώμενο κόστος για να φτάσουμε στον στόχο.
-    Βασίζεται σε:
-    1. Συνολικά σκουπίδια που απομένουν στο περιβάλλον
-    2. Απόσταση από τη σκούπα στο πλησιέστερο σκουπίδι ή στη βάση αν είναι γεμάτη
-    3. Σκουπίδια στη σκούπα (πρέπει να αδειάσει)
-    """
-    robot_pos = state[0]
-    base_pos = state[-2]
-    vacuum_dirt = state[-1]
+    robot_pos = state[0] 
+    base_pos = state[-2] 
+    vacuum_skou = state[-1] 
+
+    # Συνολικά σκουπίδια στα πλακίδια (θέσεις 1-8) 
+    total_skou= sum(state[1:9]) 
     
-    # Συνολικά σκουπίδια στο περιβάλλον (θέσεις 1-8)
-    total_dirt = sum(state[1:9])
+    # απόσταση απο το πλησιέστερο σκουπίδι 
+    min_distance_to_skou= float('inf') 
+    for i in range(1, 9): 
+        if state[i] > 0: 
+            distance = abs(robot_pos - i) 
+            min_distance_to_skou = min(min_distance_to_skou, distance) 
     
-    # Βρες την απόσταση στο πλησιέστερο σκουπίδι
-    min_distance_to_dirt = float('inf')
-    for i in range(1, 9):
-        if state[i] > 0:
-            distance = abs(robot_pos - i)
-            min_distance_to_dirt = min(min_distance_to_dirt, distance)
+    # Αν δεν υπάρχουν σκουπίδια στα πλακίδια 
+    if min_distance_to_skou == float('inf'): 
+        min_distance_to_skou = 0 
     
-    # Αν δεν υπάρχουν σκουπίδια στο περιβάλλον
-    if min_distance_to_dirt == float('inf'):
-        min_distance_to_dirt = 0
+    # Απόσταση από τη βάση 
+    distance_to_base = abs(robot_pos - base_pos) 
     
-    # Απόσταση από τη βάση
-    distance_to_base = abs(robot_pos - base_pos)
-    
-    # Αν η σκούπα είναι γεμάτη, προτεραιότητα στην απόσταση από τη βάση
-    if vacuum_dirt >= 3:
-        return total_dirt + distance_to_base * 2 + vacuum_dirt
-    else:
-        # Αλλιώς, προτεραιότητα στο πλησιέστερο σκουπίδι
-        return total_dirt + min_distance_to_dirt + vacuum_dirt * 0.5
+    # Αν η σκούπα είναι γεμάτη, τότε πηγαίνει στη βάση 
+    if vacuum_skou >= 3: 
+        return total_skou + distance_to_base * 2 + vacuum_skou 
+    else: 
+        # Αλλιώς, πηγαίνει στο πλησιέστερο σκουπίδι 
+        return total_skou + min_distance_to_skou + vacuum_skou * 0.5 
+ 
+
 
 """ ----------------------------------------------------------------------------
 **** FRONT
@@ -144,40 +138,46 @@ def make_front(state):
 **** επέκταση μετώπου    
 """
 
-def expand_front(front, method):  
-    if method == 'DFS':        
-        if front:
-            print("Front:")
-            print(front)
-            node = front.pop(0)
-            for child in find_children(node):     
-                front.insert(0, child)
-    
-    elif method == 'BFS':
-        if front:
-            print("Front:")
-            print(front)
-            node = front.pop(0)
-            for child in find_children(node):     
-                front.append(child)
-    
-    elif method == 'BestFS':
-        if front:
-            print("Front:")
-            print(front)
-            node = front.pop(0)
-            children = find_children(node)
-            
-            # Προσθήκη των παιδιών στο μέτωπο
-            front.extend(children)
-            
-            # Ταξινόμηση του μετώπου με βάση την ευρετική συνάρτηση
-            # (Μικρότερη τιμή = καλύτερη κατάσταση)
-            front.sort(key=lambda state: heuristic(state))
-            
-            print(f"Heuristic values: {[heuristic(s) for s in front[:5]]}")  # Εμφάνιση των 5 πρώτων
-    
-    return front
+
+
+def expand_front(front, method):   
+
+    if method == 'DFS':         
+
+        if front: 
+
+            print("Front:") 
+
+            print(front) 
+
+            node = front.pop(0) 
+
+            for child in find_children(node):      
+
+                front.insert(0, child) 
+    elif method == 'BFS': 
+
+        if front: 
+
+            print("Front:") 
+
+            print(front) 
+
+            node = front.pop(0) 
+
+            for child in find_children(node):      
+
+                front.append(child) 
+    elif method == 'BestFS': 
+
+        if front: 
+            print("Front:") 
+            print(front) 
+            node = front.pop(0) 
+            children = find_children(node) 
+            front.extend(children) 
+            front.sort(key=lambda state: heuristic(state)) 
+    return front 
 
 """ ----------------------------------------------------------------------------
 **** Problem depending functions
