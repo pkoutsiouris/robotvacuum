@@ -10,8 +10,6 @@
 """
 import copy
 
-# ******** Operators
-# ******** Τελεστές
 
 def move_right(state):
     if state[0] < 8:
@@ -38,10 +36,10 @@ def move_left(state):
         return state
  
 def move_to_base(state):
-    """
-    Κινείται μία θέση προς τη βάση (αριστερά ή δεξιά)
-    Χρησιμοποιείται όταν η σκούπα είναι γεμάτη
-    """
+    
+    #Κινείται μία θέση προς τη βάση (αριστερά ή δεξιά)
+    #Χρησιμοποιείται όταν η σκούπα είναι γεμάτη
+    
     robot_pos = state[0]
     base_pos = state[-2]
     
@@ -54,9 +52,9 @@ def move_to_base(state):
     
     return state
 
-'''
-Συνάρτηση εύρεσης απογόνων της τρέχουσας κατάστασης
-'''
+
+#Συνάρτηση εύρεσης απογόνων της τρέχουσας κατάστασης
+
 def find_children(state):
     children = []
     
@@ -72,7 +70,7 @@ def find_children(state):
     if right_child != None:
         children.append(right_child)
     
-    # Empty (ΠΡΟΣΘΗΚΗ ΑΥΤΟΥ)
+    #Αδειασμα
     robot_pos = state[0]
     base_pos = state[-2]
     capacity = state[-1]
@@ -84,9 +82,7 @@ def find_children(state):
     
     return children
 
-""" ----------------------------------------------------------------------------
-**** Ευρετική Συνάρτηση
-"""
+# Ευρετική Συνάρτηση
 def heuristic(state):  
 
     robot_pos = state[0] 
@@ -119,23 +115,14 @@ def heuristic(state):
  
 
 
-""" ----------------------------------------------------------------------------
-**** FRONT
-**** Διαχείριση Μετώπου
-"""
 
-""" ----------------------------------------------------------------------------
-** initialization of front
-** Αρχικοποίηση Μετώπου
-"""
+# Διαχείριση Μετώπου
 
 def make_front(state):
     return [state]
     
-""" ----------------------------------------------------------------------------
-**** expanding front
-**** επέκταση μετώπου    
-"""
+# επέκταση μετώπου    
+
 
 
 
@@ -215,10 +202,8 @@ def find_solution(state, front, closed, goal, method):
         closed_copy = copy.deepcopy(closed)
         find_solution(state, front_children, closed_copy, goal, method)
 
-"""" ----------------------------------------------------------------------------
-** Executing the code
-** κλήση εκτέλεσης κώδικα
-"""
+# κλήση εκτέλεσης κώδικα
+
            
 def main():
     

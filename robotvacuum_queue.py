@@ -11,15 +11,14 @@
 
 import copy
 
-# ******** Operators
-# ******** Τελεστές
+
 
 def move_right(state):
-    # Εάν είναι δυνατή η κίνηση (όχι στο τελευταίο πλακίδιο)
+    # Αν είναι δυνατή η κίνηση (άρα αν δεν βρίσκεται η σκούπα στο τελευταίο πλακίδιο)
     if state[0] < 8:
         state[0] = state[0] + 1
         
-        # Συλλογή σκουπιδιών (μόνο αν η σκούπα δεν είναι γεμάτη)
+        # Συλλογή σκουπιδιών,αν η σκούπα δεν είναι γεμάτη
         if state[-1] < 3:
             # Αν τα σκουπίδια στο πλακίδιο είναι περισσότερα από ό,τι χωράει η σκούπα
             if state[state[0]] > 3 - state[-1]:
@@ -35,11 +34,11 @@ def move_right(state):
     return None # Επιστρέφει None αν δεν μπορεί να κινηθεί δεξιά
     
 def move_left(state):
-    # Εάν είναι δυνατή η κίνηση (όχι στο πρώτο πλακίδιο)
+    # Εάν είναι δυνατή η κίνηση, άρα η σκούπα δεν βρίσκεται στο πρώτο πλακίδιο
     if state[0] > 1:
         state[0] = state[0] - 1
         
-        # Συλλογή σκουπιδιών (μόνο αν η σκούπα δεν είναι γεμάτη)
+        # Συλλογή σκουπιδιών, αν η σκούπα δεν είναι γεμάτη
         if state[-1] < 3:
             # Αν τα σκουπίδια στο πλακίδιο είναι περισσότερα από ό,τι χωράει η σκούπα
             if state[state[0]] > 3 - state[-1]:
@@ -55,12 +54,10 @@ def move_left(state):
     return None # Επιστρέφει None αν δεν μπορεί να κινηθεί αριστερά
 
 def move_to_base(state):
-    """
-    Κινείται μία θέση προς τη βάση (αριστερά ή δεξιά)
-    Χρησιμοποιείται όταν η σκούπα είναι γεμάτη.
-    Σημείωση: Αυτή η συνάρτηση δεν χρησιμοποιείται άμεσα στους απογόνους,
-    αλλά μπορεί να χρησιμοποιηθεί ως μέρος της ευρετικής.
-    """
+    
+   # Κινείται μία θέση προς τη βάση (αριστερά ή δεξιά)
+  #  Χρησιμοποιείται όταν η σκούπα είναι γεμάτη.
+    
     robot_pos = state[0]
     base_pos = state[-2]
     
@@ -73,9 +70,9 @@ def move_to_base(state):
     
     return state
 
-'''
-Συνάρτηση εύρεσης απογόνων της τρέχουσας κατάστασης
-'''
+
+#Συνάρτηση εύρεσης απογόνων της τρέχουσας κατάστασης
+
 def find_children(state):
     children = []
     
@@ -93,7 +90,7 @@ def find_children(state):
     if right_child != None:
         children.append(right_child)
     
-    # Empty (Άδειασμα)
+    # Άδειασμα
     robot_pos = state[0]
     base_pos = state[-2]
     capacity = state[-1]
@@ -105,9 +102,9 @@ def find_children(state):
     
     return children
 
-""" ----------------------------------------------------------------------------
-**** Ευρετική Συνάρτηση
-"""
+ 
+# Ευρετική Συνάρτηση
+
 def heuristic(state):  
 
     robot_pos = state[0]  
@@ -133,10 +130,9 @@ def heuristic(state):
         return total_skou + min_distance_to_skou + vacuum_skou * 0.5  
 
 
-""" ----------------------------------------------------------------------------
-**** FRONT
-**** Διαχείριση Μετώπου
-"""
+
+# Διαχείριση Μετώπου
+
 
 def make_front(state):
     return [state]
@@ -167,17 +163,16 @@ def expand_front(front, method):
             front.sort(key=lambda state: heuristic(state))  
     return front  
 
-""" ----------------------------------------------------------------------------
-**** QUEUE
-**** Διαχείριση ουράς
-"""
+
+# Διαχείριση ουράς
+
 
 def make_queue(state):
-    """ Αρχικοποίηση ουράς: Περιέχει μια λίστα (τη διαδρομή) που ξεκινάει από την αρχική κατάσταση. """
+    # Αρχικοποίηση ουράς 
     return [[state]]
 
 def extend_queue(queue, method):
-    """ Επέκταση ουράς (για καταγραφή διαδρομών) """
+    # Επέκταση ουράς,για καταγραφή διαδρομών 
     if not queue:
         return []
         
@@ -203,25 +198,24 @@ def extend_queue(queue, method):
             queue_copy.append(path)
             
     elif method == 'BestFS':
-        # 1. Δημιουργούμε τις νέες διαδρομές
+        # Δημιουργούμε τις νέες διαδρομές
         for child in children:
             path = copy.deepcopy(node)
             path.append(child)
             new_paths.append(path)
             
-        # 2. Προσθέτουμε τις νέες διαδρομές στην ουρά
+        # Προσθέτουμε τις νέες διαδρομές στην ουρά
         queue_copy.extend(new_paths)
         
-        # 3. Ταξινομούμε όλη την ουρά με βάση την ευρετική τιμή της τελευταίας κατάστασης
-        # Σημαντικό: Η ταξινόμηση πρέπει να είναι ίδια με το front
+        # Ταξινομούμε όλη την ουρά με βάση την ευρετική τιμή της τελευταίας κατάστασης
         queue_copy.sort(key=lambda path: heuristic(path[-1]))
     
     return queue_copy
 
-""" ----------------------------------------------------------------------------
-**** Basic recursive function to create search tree (recursive tree expansion)
-**** Βασική αναδρομική συνάρτηση για δημιουργία δέντρου αναζήτησης (αναδρομική επέκταση δέντρου)
-"""
+ 
+# Basic recursive function to create search tree (recursive tree expansion)
+# Βασική αναδρομική συνάρτηση για δημιουργία δέντρου αναζήτησης (αναδρομική επέκταση δέντρου)
+
 
 def find_solution(state, front, queue, closed, goal, method):
     
@@ -244,9 +238,8 @@ def find_solution(state, front, queue, closed, goal, method):
         print("Final Path:")
         print(queue[0])
         
-        # ***** ΠΡΟΣΘΗΚΗ ΓΙΑ ΤΗ ΜΕΤΡΗΣΗ *****
         print(f"Εξερευνημένες Καταστάσεις ({method}): {len(closed)}")
-        # ***********************************
+        
     
     else:
         closed.append(front[0])
@@ -262,15 +255,13 @@ def find_solution(state, front, queue, closed, goal, method):
         closed_copy = copy.deepcopy(closed)
         
         find_solution(state, front_children, queue_children, closed_copy, goal, method)
+# Executing the code
+# κλήση εκτέλεσης κώδικα
 
-"""" ----------------------------------------------------------------------------
-** Executing the code
-** κλήση εκτέλεσης κώδικα
-"""
             
 def main():
     
-    initial_state = [3, 2, 3, 0, 0, 2, 0, 1, 2, 3, 0]  
+    initial_state = [3, 0,0, 0, 1, 1, 1, 3, 1, 3, 0]  
     """ 
     **** [Θέση σκούπας, σκουπίδια 1ου πλακιδίου, σκουπίδια 2ου, ..., σκουπίδια 8ου, θέση βάσης, σκουπίδια σκούπας]
     """
