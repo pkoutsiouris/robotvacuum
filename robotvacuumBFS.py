@@ -105,7 +105,7 @@ def make_front(state):
 """
 
 def expand_front(front, method):  
-    #TODO: ADD EURISTIKI 
+
     if method=='DFS':        
         if front:
             print("Front:")
@@ -177,14 +177,14 @@ def find_solution(state,front, closed, goal, method):
            
 def main():
     
-    initial_state = [3, 2, 3, 0, 0, 2, 0, 1, 0, 3, 0] 
+    initial_state = [3, 2, 3, 0, 0, 2, 0, 1, 2, 3, 0] 
     """ ----------------------------------------------------------------------------
     **** [Θέση σκούπας, σκουπίδια 1ου πλακιδίου, σκουπίδια 2ου, σκουπίδια 3ου, σκουπίδια 4ου, 
           σκουπίδια 5ου, σκουπίδια 6ου, σκουπίδια 7ου, σκουπίδια 8ου, θέση βάσης, σκουπίδια σκούπας]
     """
     goal = [3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0]
     method="" 
-    #TODO: ADD EURISTIKI CHOICE 
+
     print("Choose method BFS or DFS") #User chooses BFS or DFS
     method=input()
     print(method)
